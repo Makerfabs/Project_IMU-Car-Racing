@@ -48,4 +48,3 @@ The Makerfabs IMU Module features the 6-axis MPU-6050 MEMS sensor from InvenSens
 - Install pygame library, like use : pip install pygame.
 
 - Use command line run: Python /Project_IMU-Car-Racing/car_racing_py/car_racing.py
-- 

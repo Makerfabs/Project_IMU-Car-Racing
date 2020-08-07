@@ -85,7 +85,7 @@ def draw_things(thingx,thingy,thing):
 	
 
 def car(x,y):
-	gameDisplay.blit(carImg,(x,y))
+	gameDisplay.blit(carImg,(int(x),int(y)))
 
 def text_objects(text,font):
 	textSurface = font.render(text,True,black)
@@ -93,9 +93,9 @@ def text_objects(text,font):
 	
 	
 def message_display(text,size,x,y):
-	font = pygame.font.Font("freesansbold.ttf",size)
+	font = pygame.font.Font("SourceCodePro.ttf",size)
 	text_surface , text_rectangle = text_objects(text,font)
-	text_rectangle.center =(x,y)
+	text_rectangle.center =(int(x),int(y))
 	gameDisplay.blit(text_surface,text_rectangle)
 	
 	
@@ -109,8 +109,8 @@ def crash(x,y):
 	gameloop() #for restart the game
 	
 def gameloop():
-	bg_x1 = (display_width/2)-(360/2)
-	bg_x2 = (display_width/2)-(360/2)
+	bg_x1 = int((display_width/2)-(360/2))
+	bg_x2 = int((display_width/2)-(360/2))
 	bg_y1 = 0
 	bg_y2 = -600
 	bg_speed = 8
@@ -180,7 +180,7 @@ def gameloop():
 		
 		gameDisplay.fill(green) #display white background
 		
-		gameDisplay.blit(bgImg,(bg_x1,bg_y1))
+		gameDisplay.blit(bgImg,(int(float(bg_x1)),int(float(bg_y1))))
 		gameDisplay.blit(bgImg,(bg_x2,bg_y2))
 		car(car_x,car_y) #display car
 		draw_things(thing_startx,thing_starty,car2Img)
