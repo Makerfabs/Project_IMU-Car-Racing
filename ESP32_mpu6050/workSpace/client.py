@@ -1,3 +1,4 @@
+#通过udp将mpu的倾斜值上传到pc端，可以用udp_server.py测试
 #wifi
 import socket
 import time

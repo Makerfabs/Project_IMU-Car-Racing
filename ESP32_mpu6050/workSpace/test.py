@@ -1,3 +1,4 @@
+#仅测试用
 #!/usr/bin/python3
 import mpu6050
 from machine import Pin,I2C

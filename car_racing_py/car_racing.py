@@ -1,3 +1,4 @@
+#原来的游戏逻辑基本没动，就是根据定时发送的mpu倾斜角模拟方向键
 import pygame
 import time
 import random 

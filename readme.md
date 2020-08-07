@@ -34,6 +34,8 @@ The Makerfabs IMU Module features the 6-axis MPU-6050 MEMS sensor from InvenSens
 
 # STEPS
 
+The car-racing game is change from : [sipspatidar/car_racing](https://github.com/sipspatidar/car_racing)
+
 ## Prepare And Burn ESP32_IMU
 
 **If you have any questions，such as how to install the development board, how to download the code, how to install the library. Please refer to :[Makerfabs_FAQ](https://github.com/Makerfabs/Makerfabs_FAQ)**
@@ -46,5 +48,7 @@ The Makerfabs IMU Module features the 6-axis MPU-6050 MEMS sensor from InvenSens
 ## Prepare Upper Computer Software
 
 - Install pygame library, like use : pip install pygame.
-
 - Use command line run: Python /Project_IMU-Car-Racing/car_racing_py/car_racing.py
+- Click GO and reset esp32.
+- Wait seconds , esp32 need connect wifi.
+- Then game start.
