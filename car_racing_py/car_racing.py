@@ -11,7 +11,7 @@ server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # udp协议
 server.bind(ip_port)
 
 pygame.init()
-display_width = 800
+display_width = 742
 display_height = 600
 
 black = (0,0,0)
@@ -27,6 +27,7 @@ gameDisplay = pygame.display.set_mode((display_width,display_height))
 pygame.display.set_caption("Car Racing")
 clock = pygame.time.Clock()
 
+logoImg = pygame.image.load("logo11-190x63.png")
 carImg = pygame.image.load("car1.png") #load the car image
 car2Img = pygame.image.load("car2.png")
 bgImg = pygame.image.load("back2.jpg")
@@ -46,6 +47,8 @@ def intro():
 				pygame.quit()
 				quit()
 		pygame.display.set_icon(carImg)
+
+
 		
 		pygame.draw.rect(gameDisplay,black,(200,400,100,50))
 		pygame.draw.rect(gameDisplay,black,(500,400,100,50))
@@ -55,6 +58,8 @@ def intro():
 		message_display("Press Go and rst esp32",30,display_width/2,display_height/2 + 200)
 		pygame.draw.rect(gameDisplay,green,(200,400,100,50))
 		pygame.draw.rect(gameDisplay,red,(500,400,100,50))
+
+		gameDisplay.blit(logoImg,(0,0))
 		
 		mouse = pygame.mouse.get_pos()
 		click = pygame.mouse.get_pressed()
@@ -100,8 +105,6 @@ def message_display(text,size,x,y):
 	gameDisplay.blit(text_surface,text_rectangle)
 	
 	
-	
-	
 def crash(x,y):
 	gameDisplay.blit(crash_img,(x,y))
 	message_display("You Crashed",115,display_width/2,display_height/2)
@@ -110,8 +113,8 @@ def crash(x,y):
 	gameloop() #for restart the game
 	
 def gameloop():
-	bg_x1 = int((display_width/2)-(360/2))
-	bg_x2 = int((display_width/2)-(360/2))
+	bg_x1 = int((display_width/2)-(741/2))
+	bg_x2 = int((display_width/2)-(741/2))
 	bg_y1 = 0
 	bg_y2 = -600
 	bg_speed = 8
@@ -119,9 +122,17 @@ def gameloop():
 	car_x = ((display_width / 2) - (car_width / 2))
 	car_y = (display_height - car_height)
 	car_x_change = 0
-	road_start_x =  (display_width/2)-112
-	road_end_x = (display_width/2)+112
-	
+	road_start_x =  (display_width/2)-210
+	road_end_x = (display_width/2)+210
+
+	thing_list = []
+	for i in range(10):
+		thing = {}
+		thing["x"] =  random.randrange(road_start_x,road_end_x-car_width)
+		thing["y"] =  -600
+		thing_list.append(thing)
+	print(thing_list)
+
 	thing_startx = random.randrange(road_start_x,road_end_x-car_width)
 	thing_starty = -600
 	thingw = 50
@@ -162,8 +173,7 @@ def gameloop():
 					car_x_change = 0
 			
 		#udp	
-		car_x = (display_width/2) + 112 * imu_direct_x / 10
-		#car_y = (display_width/2) + 112 * imu_direct_y / 10
+		car_x = (display_width/2) + 200 * imu_direct_x / 10
 
 		#car_x+=car_x_change
 		
@@ -172,26 +182,53 @@ def gameloop():
 		if car_x < road_start_x:
 			crash(car_x-car_width,car_y)
 		
-		
+		"""
 		if car_y < thing_starty + thingh and car_y > thing_starty - thingh :
 			if car_x >= thing_startx and car_x <= thing_startx+thingw:
 				crash(car_x-25,car_y-car_height/2)
 			if car_x+car_width >= thing_startx and car_x+car_width <= thing_startx+thingw:
 				crash(car_x,car_y-car_height/2)
+"""
+		
+
+		level = int(count / 200)
+		if level > 9:
+			level = 9
+		
+		for i in range(level + 1):
+			if car_y < thing_list[i]["y"] + thingh and car_y > thing_list[i]["y"] - thingh :
+				if car_x >= thing_list[i]["x"] and car_x <= thing_list[i]["x"]+thingw:
+					crash(car_x-25,car_y-car_height/2)
+				if car_x+car_width >= thing_list[i]["x"] and car_x+car_width <= thing_list[i]["x"]+thingw:
+					crash(car_x,car_y-car_height/2)			
+
 		
 		gameDisplay.fill(green) #display white background
 		
 		gameDisplay.blit(bgImg,(int(float(bg_x1)),int(float(bg_y1))))
 		gameDisplay.blit(bgImg,(bg_x2,bg_y2))
 		car(car_x,car_y) #display car
-		draw_things(thing_startx,thing_starty,car2Img)
+		
+		#draw_things(thing_startx,thing_starty,car2Img)
+
+		for i in range(level + 1): 
+			draw_things(thing_list[i]["x"],thing_list[i]["y"],car2Img)
+			thing_list[i]["y"] += thing_speed - imu_direct_y
+		
+			if thing_list[i]["y"] > display_height:
+				thing_list[i]["x"] = random.randrange(road_start_x,road_end_x-car_width)
+				thing_list[i]["y"] = -200
+
 		highscore(count)
 		count+=1
+
+		"""
 		thing_starty += thing_speed - imu_direct_y
 		
 		if thing_starty > display_height:
 			thing_startx = random.randrange(road_start_x,road_end_x-car_width)
 			thing_starty = -200
+		"""
 			
 		bg_y1 += bg_speed - imu_direct_y
 		bg_y2 += bg_speed - imu_direct_y
