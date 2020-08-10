@@ -77,7 +77,7 @@ def main():
 import socket
 BUFSIZE = 1024
 ip_port = ('192.168.1.125', 80)
-server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # udp协议
+server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # udp
 server.bind(ip_port)
 ```
 
