@@ -1,4 +1,3 @@
-#mpu6050 驱动
 import machine
 
 

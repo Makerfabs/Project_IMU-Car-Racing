@@ -1,4 +1,4 @@
-#通过udp将mpu的倾斜值上传到pc端，可以用udp_server.py测试
+# Upload the slanted value of MPU to PC by UDP and test with udp_server.py
 #wifi
 import socket
 import time
@@ -15,7 +15,7 @@ i2c = I2C(scl=Pin(5), sda=Pin(4))
 accelerometer = mpu6050.accel(i2c)
 ints = accelerometer.get_ints()
 
-#初始化传感器
+#init sensor
 sum_val = 0
 for i in range(400):
   acc_data = accelerometer.get_values()
@@ -37,7 +37,7 @@ for i in range(400):
 
 error_z = sum_val/400
 
-#平滑滤波器
+#avg filter
 
 class avg_fiter():
     def __init__(self, data_list):
@@ -45,7 +45,6 @@ class avg_fiter():
         self.data_list=data_list
 
     def fit(self, data, len):
-        #data是传入的数据,len是平滑的长度
         self.data_sum = self.data_sum - self.data_list[0] + data
         self.data_list.pop(0)
         self.data_list.append(data)
@@ -70,7 +69,7 @@ def main():
   ip_port = ('192.168.1.125', 80)
   client = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
   while True:
-    #z轴数值不对，留着占位
+    #z is wrong, isn't used.
     xyz = {"x":0,"y":0,"z":0}
     time.sleep_ms(10)
     acc_data = accelerometer.get_values()

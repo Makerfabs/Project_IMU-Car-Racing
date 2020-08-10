@@ -8,6 +8,6 @@ while True:
     client.sendto("msg".encode('utf-8'),ip_port)
  
     data,server_addr = client.recvfrom(BUFSIZE)
-    print('客户端recvfrom ',data,server_addr)
+    print('client recvfrom ',data,server_addr)
  
 client.close()

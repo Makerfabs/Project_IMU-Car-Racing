@@ -1,4 +1,3 @@
-#原来的游戏逻辑基本没动，就是根据定时发送的mpu倾斜角模拟方向键
 import pygame
 import time
 import random 
@@ -7,7 +6,7 @@ import random
 import socket
 BUFSIZE = 1024
 ip_port = ('192.168.1.125', 80)
-server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # udp协议
+server = socket.socket(socket.AF_INET, socket.SOCK_DGRAM)  # udp
 server.bind(ip_port)
 
 pygame.init()
@@ -125,6 +124,7 @@ def gameloop():
 	road_start_x =  (display_width/2)-210
 	road_end_x = (display_width/2)+210
 
+	#Red cars list init
 	thing_list = []
 	for i in range(10):
 		thing = {}
@@ -145,7 +145,7 @@ def gameloop():
 		#UDP
 		data,client_addr = server.recvfrom(BUFSIZE)
 		server.sendto(data.upper(),client_addr)
-		print('server收到的数据:',data)
+		print('server reserve:',data)
 		data_str = data.decode('utf-8').encode('utf-8')
 		xyz = eval(data_str)
 		imu_direct_x = int(xyz["x"])
