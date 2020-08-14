@@ -2,13 +2,18 @@
 
 ```
 /*
-Version:		V1.1
+Version:		V1.2
 Author:			Vincent
 Create Date:	2020/8/6
 Note：
+	v1.2:2020/8/13,Adjusted some code structure, added code description.Add youtube video.
+	
+*/
 ```
 
 ![main](md_pic/main.gif)
+
+[Youtube:ESP32 IMU Module WiFi Project - Car Racing Game](https://www.youtube.com/watch?v=hGF9wJc5yAs)
 
 
 
@@ -462,12 +467,163 @@ gameloop()
 
 ### client.py
 
-Udp connect and main code.
+Main logic.
+
+- Averaging filter
+
+```python
+class avg_fiter():
+    def __init__(self, data_list):
+        self.data_sum=sum(data_list)
+        self.data_list=data_list
+
+    def fit(self, data, len):
+        self.data_sum = self.data_sum - self.data_list[0] + data
+        self.data_list.pop(0)
+        self.data_list.append(data)
+        data = self.data_sum/len
+        return data
+```
+
+- Main function
+
+```python
+def main():
+  #connect wifi
+  wifi.connect()
+  ip_port = ('192.168.1.125', 80)
+  client = socket.socket(socket.AF_INET,socket.SOCK_DGRAM)
+  while True:
+    #z is wrong, isn't used.
+    xyz = {"x":0,"y":0,"z":0}
+    time.sleep_ms(10)
+    #Get angle values from mpu6050
+    acc_data = accelerometer.get_values()
+    try:
+      #Convert mpU data into integers and save them in the dictionary.
+      temp = avgfiter_x.fit(acc_data['AcX']/16384-error_x,5)
+      temp_int = int(temp*10)
+      xyz["x"] = temp_int
+      temp = avgfiter_y.fit(acc_data['AcY']/16384-error_y,5)
+      temp_int = int(temp*10)
+      xyz["y"] = temp_int
+      temp = avgfiter_z.fit(acc_data['AcZ']/16384-error_z,5)
+      temp_int = int(temp*10)
+      xyz["z"] = temp_int
+
+      print(xyz)
+
+    except:
+      print('===========END============')
+      break
+
+    text = str(xyz)
+    #Send data by udp.
+    client.sendto(text.encode('utf-8'),ip_port)
+    data,server_addr = client.recvfrom(BUFSIZE)
+    #print('client recvfrom ',data,server_addr)
+    pass
+```
 
 ### mpu6050.py 
 
 6-axis MPU-6050 MEMS sensor driver.
 
+```python
+import machine
+
+
+class accel():
+    #I2C is initialized with IC address 0x68
+    def __init__(self, i2c, addr=0x68):
+        self.iic = i2c
+        self.addr = addr
+        self.iic.start()
+        self.iic.writeto(self.addr, bytearray([107, 0]))
+        self.iic.stop()
+
+    #Read data from mpu6050
+    def get_raw_values(self):
+        self.iic.start()
+        a = self.iic.readfrom_mem(self.addr, 0x3B, 14)
+        self.iic.stop()
+        return a
+
+    def get_ints(self):
+        b = self.get_raw_values()
+        c = []
+        for i in b:
+            c.append(i)
+        return c
+
+    #Converts a two-byte byte to a 16-bit integer.
+    def bytes_toint(self, firstbyte, secondbyte):
+        if not firstbyte & 0x80:
+            return firstbyte << 8 | secondbyte
+        return - (((firstbyte ^ 255) << 8) | (secondbyte ^ 255) + 1)
+
+    def get_values(self):
+        raw_ints = self.get_raw_values()
+        vals = {}
+        vals["AcX"] = self.bytes_toint(raw_ints[0], raw_ints[1])
+        vals["AcY"] = self.bytes_toint(raw_ints[2], raw_ints[3])
+        vals["AcZ"] = self.bytes_toint(raw_ints[4], raw_ints[5])
+        vals["Tmp"] = self.bytes_toint(raw_ints[6], raw_ints[7]) / 340.00 + 36.53
+        vals["GyX"] = self.bytes_toint(raw_ints[8], raw_ints[9])
+        vals["GyY"] = self.bytes_toint(raw_ints[10], raw_ints[11])
+        vals["GyZ"] = self.bytes_toint(raw_ints[12], raw_ints[13])
+        return vals  # returned in range of Int16
+        # -32768 to 32767
+
+    def val_test(self):  # ONLY FOR TESTING! Also, fast reading sometimes crashes IIC
+        from time import sleep
+        while 1:
+            print(self.get_values())
+            sleep(0.05)
+```
+
+
+
 ### wifi.py 
 
 ESP32 wifi connect config.
+
+```python
+import network
+import time
+
+#wifi
+SSID = "Makerfabs"      #Modify here with SSID
+PASSWORD = "20160704"   #Modify here with PWD
+
+def do_connect(ssid,psw):
+    wlan = network.WLAN(network.STA_IF)
+    wlan.active(True)
+    s = wlan.config("mac")
+    mac = ('%02x:%02x:%02x:%02x:%02x:%02x').upper() %(s[0],s[1],s[2],s[3],s[4],s[5])
+    print("Local MAC:"+mac) #get mac 
+    wlan.connect(ssid, psw)
+    if not wlan.isconnected():
+        print('connecting to network...' + ssid)
+        wlan.connect(ssid, psw)
+
+    start = time.ticks_ms() # get millisecond counter
+    while not wlan.isconnected():
+        time.sleep(1) # sleep for 1 second
+        if time.ticks_ms()-start > 20000:
+            print("connect timeout!")
+            break
+
+    if wlan.isconnected():
+        print('network config:', wlan.ifconfig()[0])
+        global ip
+        ip = str(wlan.ifconfig()[0])
+    return wlan
+
+def connect():
+ do_connect(SSID,PASSWORD)
+ global ip
+ return ip
+ 
+```
+
